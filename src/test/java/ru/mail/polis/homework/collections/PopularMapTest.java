@@ -137,7 +137,7 @@ public class PopularMapTest {
         popularMap1.get(key2);
         popularMap1.remove(key1);
 
-        assertEquals(value1, popularMap1.getPopularValue());
+        assertEquals(value3, popularMap1.getPopularValue());
         assertEquals(4, popularMap1.getValuePopularity(value1));
         assertEquals(3, popularMap1.getValuePopularity(value2));
         assertEquals(4, popularMap1.getValuePopularity(value3));

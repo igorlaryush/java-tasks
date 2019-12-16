@@ -1,8 +1,7 @@
 package ru.mail.polis.homework.collections.mail;
 
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -12,42 +11,70 @@ import java.util.function.Consumer;
  *
  * В реализации нигде не должно быть классов Object и коллекций без типа. Используйте дженерики.
  */
-public class MailService implements Consumer {
+public class MailService implements Consumer<Sendable> {
+
+    private Map<String, List<Sendable>> receiverMails = new HashMap<>();
+    private Map<String, List<Sendable>> senderMails = new HashMap<>();
 
     /**
      * С помощью этого метода почтовый сервис обрабатывает письма и зарплаты
      * 1 балл
      */
     @Override
-    public void accept(Object o) {
+    public void accept(Sendable object) {
+        String receiver = object.getTo();
+        receiverMails.compute(receiver, (key, sendables) -> {
+            if (sendables == null) {
+                sendables = new ArrayList<>();
+            }
+            sendables.add(object);
+            return sendables;
+        });
+
+        String sender = object.getFrom();
+        senderMails.compute(sender, (key, sendables) -> {
+            if (sendables == null) {
+                sendables = new ArrayList<>();
+            }
+            sendables.add(object);
+            return sendables;
+        });
 
     }
 
     /**
      * Метод возвращает мапу получатель -> все объекты которые пришли к этому получателю через данный почтовый сервис
      */
-    public Map<String, List> getMailBox() {
-        return null;
+    public Map<String, List<Sendable>> getMailBox() {
+        return receiverMails;
     }
 
     /**
      * Возвращает самого популярного отправителя
      */
     public String getPopularSender() {
-        return null;
+        Optional<Map.Entry<String, List<Sendable>>> max = senderMails
+                .entrySet()
+                .stream()
+                .max(Comparator.comparingInt(entry -> entry.getValue().size()));
+        return max.map(Map.Entry::getKey).orElse(null);
     }
 
     /**
      * Возвращает самого популярного получателя
      */
     public String getPopularRecipient() {
-        return null;
+        Optional<Map.Entry<String, List<Sendable>>> max = receiverMails
+                .entrySet()
+                .stream()
+                .max(Comparator.comparingInt(entry -> entry.getValue().size()));
+        return max.map(Map.Entry::getKey).orElse(null);
     }
 
     /**
      * Метод должен заставить обработать service все mails.
      */
-    public static void process(MailService service, List mails) {
-
+    public static void process(MailService service, List<Sendable> mails) {
+        mails.forEach(service::accept);
     }
 }
